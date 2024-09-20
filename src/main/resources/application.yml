@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: kotlin-rest-api
+message: Hello from default profile!
+
+#---
+#
+#spring:
+#  config:
+#    activate:
+#      on-profile: prod
