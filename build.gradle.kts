@@ -30,15 +30,16 @@ dependencies {
 
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 
     // logging
     implementation("io.github.microutils:kotlin-logging-jvm:2.0.11")
 
     runtimeOnly("com.h2database:h2")
     //runtimeOnly("org.postgresql:postgresql")
+
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("org.springframework.boot:spring-boot-starter-webflux")
 }
 
 kotlin {
@@ -56,7 +57,7 @@ sourceSets {
         java {
            setSrcDirs(listOf("src/test/intg", "src/test/unit"))
         }
-        
+
         // before 7.1
         //  withConvention(KotlinSourceSet::class) {
         //      kotlin.setSrcDirs(listOf("src/test/intg", "src/test/unit"))
