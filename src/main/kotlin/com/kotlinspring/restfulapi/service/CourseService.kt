@@ -2,6 +2,7 @@ package com.kotlinspring.restfulapi.service
 
 import com.kotlinspring.restfulapi.dto.CourseDTO
 import com.kotlinspring.restfulapi.entity.Course
+import com.kotlinspring.restfulapi.exception.CourseNotFoundException
 import com.kotlinspring.restfulapi.repository.CourseRepository
 import mu.KLogging
 import org.springframework.stereotype.Service
@@ -28,6 +29,22 @@ class CourseService(val courseRepository: CourseRepository) {
     fun retrieveAllCourses(): List<CourseDTO> {
         return courseRepository.findAll().map {
             CourseDTO(it.id, it.name, it.category)
+        }
+    }
+
+    fun updateCourse(courseId: Int, courseDTO: CourseDTO): CourseDTO {
+        val existingCourse = courseRepository.findById(courseId)
+
+        return if(existingCourse.isPresent) {
+            existingCourse.get()
+                .let {
+                    it.name = courseDTO.name
+                    it.category = courseDTO.category
+                    val savedCourse = courseRepository.save(it)
+                    CourseDTO(savedCourse.id, savedCourse.name, savedCourse.category)
+                }
+        } else {
+            throw CourseNotFoundException("No course found for the passed Id: $courseId")
         }
     }
 }
