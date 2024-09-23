@@ -88,4 +88,19 @@ class CourseControllerIntgTest {
 
         assertEquals("name1", result!!.name)
     }
+
+    @Test
+    fun deleteCourse() {
+
+        val course =  Course(null,
+            "Build RestFul APis using SpringBoot and Kotlin", "Development")
+
+        val savedCourse = courseRepository.save(course)
+
+        val result = webTestClient
+            .delete()
+            .uri("/v1/courses/{courseId}", savedCourse.id)
+            .exchange()
+            .expectStatus().isNoContent
+    }
 }
