@@ -3,6 +3,7 @@ package com.kotlinspring.controller
 import com.kotlinspring.restfulapi.RestfulApiApplication
 import com.kotlinspring.restfulapi.controller.CourseController
 import com.kotlinspring.restfulapi.dto.CourseDTO
+import com.kotlinspring.restfulapi.entity.Course
 import com.kotlinspring.restfulapi.repository.CourseRepository
 import com.kotlinspring.util.courseEntityList
 import org.junit.jupiter.api.Assertions
@@ -63,5 +64,28 @@ class CourseControllerIntgTest {
             .responseBody
 
         assertEquals(3, result!!.size)
+    }
+
+    @Test
+    fun updateCourse() {
+
+        val course =  Course(null,
+            "Build RestFul APis using SpringBoot and Kotlin", "Development")
+
+        val savedCourse = courseRepository.save(course)
+
+        val courseDTO = CourseDTO(null, "name1", "category1");
+
+        val result = webTestClient
+            .put()
+            .uri("/v1/courses/{courseId}", savedCourse.id)
+            .bodyValue(courseDTO)
+            .exchange()
+            .expectStatus().isOk
+            .expectBody(CourseDTO::class.java)
+            .returnResult()
+            .responseBody
+
+        assertEquals("name1", result!!.name)
     }
 }
