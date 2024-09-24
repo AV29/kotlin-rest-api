@@ -4,43 +4,40 @@ import com.kotlinspring.restfulapi.RestfulApiApplication
 import com.kotlinspring.restfulapi.controller.CourseController
 import com.kotlinspring.restfulapi.dto.CourseDTO
 import com.kotlinspring.restfulapi.entity.Course
-import com.kotlinspring.restfulapi.repository.CourseRepository
-import com.kotlinspring.util.courseEntityList
+import com.kotlinspring.restfulapi.service.CourseService
+import com.kotlinspring.util.courseDTO
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+
+import com.ninjasquad.springmockk.MockkBean
+import io.mockk.every
+import io.mockk.just
+import io.mockk.runs
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.web.reactive.server.WebTestClient
 
-@SpringBootTest(classes = [RestfulApiApplication::class, CourseController::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
+@WebMvcTest(CourseController::class)
+@ContextConfiguration(classes = [RestfulApiApplication::class])
 @AutoConfigureWebTestClient
-class CourseControllerIntgTest {
+class CourseControllerUnitTest {
     @Autowired
     lateinit var webTestClient: WebTestClient
 
-    @Autowired
-    lateinit var courseRepository: CourseRepository
-
-    @BeforeEach
-    fun setup() {
-        courseRepository.deleteAll()
-        val courses = courseEntityList()
-        courseRepository.saveAll(courses)
-    }
+    @MockkBean
+    lateinit var courseServiceMock: CourseService
 
     @Test
     fun addCourse() {
-        val courseDTO = CourseDTO(null, "name1", "category1")
+        every { courseServiceMock.addCourse(any()) } returns courseDTO(id = 1)
 
         val result = webTestClient
             .post()
             .uri("/v1/courses")
-            .bodyValue(courseDTO)
+            .bodyValue(courseDTO())
             .exchange()
             .expectStatus().isCreated
             .expectBody(CourseDTO::class.java)
@@ -54,6 +51,8 @@ class CourseControllerIntgTest {
 
     @Test
     fun retrieveAllCourses() {
+        every { courseServiceMock.retrieveAllCourses() }.returns(listOf(courseDTO(id = 1), courseDTO(id = 2)))
+
         val result = webTestClient
             .get()
             .uri("/v1/courses")
@@ -63,43 +62,34 @@ class CourseControllerIntgTest {
             .returnResult()
             .responseBody
 
-        assertEquals(3, result!!.size)
+        assertEquals(2, result!!.size)
     }
 
     @Test
     fun updateCourse() {
-
-        val course =  Course(null,
-            "Build RestFul APis using SpringBoot and Kotlin", "Development")
-
-        val savedCourse = courseRepository.save(course)
-
-        val courseDTO = CourseDTO(null, "name1", "category1");
+        every { courseServiceMock.updateCourse(any(), any()) } returns courseDTO(id = 100, name = "test test")
 
         val result = webTestClient
             .put()
-            .uri("/v1/courses/{courseId}", savedCourse.id)
-            .bodyValue(courseDTO)
+            .uri("/v1/courses/{courseId}", 100)
+            .bodyValue(CourseDTO(null, "name1", "category1"))
             .exchange()
             .expectStatus().isOk
             .expectBody(CourseDTO::class.java)
             .returnResult()
             .responseBody
 
-        assertEquals("name1", result!!.name)
+        assertEquals("test test", result!!.name)
     }
 
     @Test
     fun deleteCourse() {
 
-        val course =  Course(null,
-            "Build RestFul APis using SpringBoot and Kotlin", "Development")
-
-        val savedCourse = courseRepository.save(course)
+        every { courseServiceMock.deleteCourse(any()) } just runs
 
         webTestClient
             .delete()
-            .uri("/v1/courses/{courseId}", savedCourse.id)
+            .uri("/v1/courses/{courseId}", 100)
             .exchange()
             .expectStatus().isNoContent
     }
