@@ -50,6 +50,41 @@ class CourseControllerUnitTest {
     }
 
     @Test
+    fun addCourse_validation() {
+        every { courseServiceMock.addCourse(any()) } returns courseDTO(id = 1)
+
+        val result = webTestClient
+            .post()
+            .uri("/v1/courses")
+            .bodyValue(courseDTO(null, "", ""))
+            .exchange()
+            .expectStatus().isBadRequest
+            .expectBody(String::class.java)
+            .returnResult()
+            .responseBody
+
+        assertEquals("Course category cannot be blank.,Course name cannot be blank.", result)
+    }
+
+    @Test
+    fun addCourse_general_exception() {
+        val errorMessage = "error!";
+        every { courseServiceMock.addCourse(any()) } throws RuntimeException(errorMessage)
+
+        val result = webTestClient
+            .post()
+            .uri("/v1/courses")
+            .bodyValue(courseDTO(null, "adsasd", "asdasd"))
+            .exchange()
+            .expectStatus().is5xxServerError
+            .expectBody(String::class.java)
+            .returnResult()
+            .responseBody
+
+        assertEquals(errorMessage, result)
+    }
+
+    @Test
     fun retrieveAllCourses() {
         every { courseServiceMock.retrieveAllCourses() }.returns(listOf(courseDTO(id = 1), courseDTO(id = 2)))
 
