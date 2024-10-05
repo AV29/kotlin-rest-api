@@ -19,8 +19,8 @@ class CourseController(val courseService: CourseService) {
     }
 
     @GetMapping
-    fun retrieveAllCourses(): List<CourseDTO> {
-        return courseService.retrieveAllCourses()
+    fun retrieveAllCourses(@RequestParam("course_name", required = false) courseName: String?): List<CourseDTO> {
+        return courseService.retrieveAllCourses(courseName)
     }
 
     @PutMapping("/{course_id}")

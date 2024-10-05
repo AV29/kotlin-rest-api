@@ -86,7 +86,7 @@ class CourseControllerUnitTest {
 
     @Test
     fun retrieveAllCourses() {
-        every { courseServiceMock.retrieveAllCourses() }.returns(listOf(courseDTO(id = 1), courseDTO(id = 2)))
+        every { courseServiceMock.retrieveAllCourses(any()) }.returns(listOf(courseDTO(id = 1), courseDTO(id = 2)))
 
         val result = webTestClient
             .get()
