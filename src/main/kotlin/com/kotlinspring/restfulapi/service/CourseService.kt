@@ -3,18 +3,25 @@ package com.kotlinspring.restfulapi.service
 import com.kotlinspring.restfulapi.dto.CourseDTO
 import com.kotlinspring.restfulapi.entity.Course
 import com.kotlinspring.restfulapi.exception.CourseNotFoundException
+import com.kotlinspring.restfulapi.exception.InstructorNotValidException
 import com.kotlinspring.restfulapi.repository.CourseRepository
 import mu.KLogging
 import org.springframework.stereotype.Service
 
 @Service
-class CourseService(val courseRepository: CourseRepository) {
+class CourseService(val courseRepository: CourseRepository, val instructorService: InstructorService) {
     companion object: KLogging()
 
     fun addCourse(courseDTO: CourseDTO): CourseDTO {
 
+        val foundInstructor = instructorService.findByInstructorId(courseDTO.instructorId!!)
+
+        if(!foundInstructor.isPresent) {
+            throw InstructorNotValidException("Instructor Not Valid for the Id: ${courseDTO.instructorId}");
+        }
+
         val courseEntity = courseDTO.let {
-            Course(null, it.name, it.category)
+            Course(null, it.name, it.category, foundInstructor.get())
         }
 
         val savedCourse = courseRepository.save(courseEntity)
@@ -22,7 +29,7 @@ class CourseService(val courseRepository: CourseRepository) {
         logger.info("Saved course 1 is: $savedCourse")
 
         return savedCourse.let {
-            CourseDTO(it.id, it.name, it.category)
+            CourseDTO(it.id, it.name, it.category, it.instructor!!.id)
         }
     }
 

@@ -5,6 +5,7 @@ import com.kotlinspring.restfulapi.entity.Instructor
 import com.kotlinspring.restfulapi.repository.InstructorRepository
 import mu.KLogging
 import org.springframework.stereotype.Service
+import java.util.Optional
 
 @Service
 class InstructorService(val instructorRepository: InstructorRepository) {
@@ -23,5 +24,9 @@ class InstructorService(val instructorRepository: InstructorRepository) {
         return createdInstructor.let {
             InstructorDTO(it.id, it.name)
         }
+    }
+
+    fun findByInstructorId(instructorId: Int): Optional<Instructor> {
+        return instructorRepository.findById(instructorId);
     }
 }
