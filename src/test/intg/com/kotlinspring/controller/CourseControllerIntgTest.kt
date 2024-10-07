@@ -5,7 +5,9 @@ import com.kotlinspring.restfulapi.controller.CourseController
 import com.kotlinspring.restfulapi.dto.CourseDTO
 import com.kotlinspring.restfulapi.entity.Course
 import com.kotlinspring.restfulapi.repository.CourseRepository
+import com.kotlinspring.restfulapi.repository.InstructorRepository
 import com.kotlinspring.util.courseEntityList
+import com.kotlinspring.util.instructorEntity
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -27,16 +29,23 @@ class CourseControllerIntgTest {
     @Autowired
     lateinit var courseRepository: CourseRepository
 
+    @Autowired
+    lateinit var instructorRepository: InstructorRepository
+
     @BeforeEach
     fun setup() {
         courseRepository.deleteAll()
-        val courses = courseEntityList()
+        instructorRepository.deleteAll()
+        val instructor = instructorRepository.save(instructorEntity());
+        val courses = courseEntityList(instructor)
         courseRepository.saveAll(courses)
     }
 
     @Test
     fun addCourse() {
-        val courseDTO = CourseDTO(null, "name1", "category1")
+        val instructor = instructorRepository.findAll().first();
+
+        val courseDTO = CourseDTO(null, "name1", "category1", instructor.id)
 
         val result = webTestClient
             .post()
@@ -88,13 +97,14 @@ class CourseControllerIntgTest {
 
     @Test
     fun updateCourse() {
+        val instructor = instructorRepository.findAll().first();
 
         val course =  Course(null,
-            "Build RestFul APis using SpringBoot and Kotlin", "Development")
+            "Build RestFul APis using SpringBoot and Kotlin", "Development", instructor)
 
         val savedCourse = courseRepository.save(course)
 
-        val courseDTO = CourseDTO(null, "name1", "category1");
+        val courseDTO = CourseDTO(null, "name1", "category1", savedCourse.instructor!!.id);
 
         val result = webTestClient
             .put()
@@ -111,9 +121,10 @@ class CourseControllerIntgTest {
 
     @Test
     fun deleteCourse() {
+        val instructor = instructorRepository.findAll().first();
 
         val course =  Course(null,
-            "Build RestFul APis using SpringBoot and Kotlin", "Development")
+            "Build RestFul APis using SpringBoot and Kotlin", "Development", instructor)
 
         val savedCourse = courseRepository.save(course)
 
