@@ -7,6 +7,7 @@ import com.kotlinspring.restfulapi.service.InstructorService
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
@@ -25,14 +26,13 @@ class InstructorControllerUnitTest {
     lateinit var instructorServiceMock: InstructorService
 
     @Test
-    fun addCourse() {
-        val instructorDTO = InstructorDTO(null, "Anton")
+    fun createInstructor() {
         every { instructorServiceMock.createInstructor(any()) } returns InstructorDTO(2, "Anton")
 
         val result = webTestClient
             .post()
             .uri("/v1/instructors")
-            .bodyValue(instructorDTO)
+            .bodyValue(InstructorDTO(null, "Anton"))
             .exchange()
             .expectStatus().isCreated
             .expectBody(InstructorDTO::class.java)
@@ -42,5 +42,23 @@ class InstructorControllerUnitTest {
         Assertions.assertTrue {
             result!!.id == 2
         }
+    }
+
+    @Test
+    fun createInstructor_validation() {
+
+        every { instructorServiceMock.createInstructor(any()) } returns InstructorDTO(1, "Anton")
+
+        val result = webTestClient
+            .post()
+            .uri("/v1/instructors")
+            .bodyValue(InstructorDTO(null, ""))
+            .exchange()
+            .expectStatus().isBadRequest
+            .expectBody(String::class.java)
+            .returnResult()
+            .responseBody
+
+        assertEquals("instructorqwe name cannot be blank.", result)
     }
 }

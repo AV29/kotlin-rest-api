@@ -24,7 +24,7 @@ class InstructorControllerIntgTest {
     }
 
     @Test
-    fun addCourse() {
+    fun createInstructor() {
         val instructorDTO = InstructorDTO(null, "Anton")
 
         val result = webTestClient
