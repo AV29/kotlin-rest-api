@@ -26,8 +26,8 @@ class InstructorControllerUnitTest {
 
     @Test
     fun addCourse() {
-        val instructorDTO = InstructorDTO(2, "Anton")
-        every { instructorServiceMock.createInstructor(any()) } returns instructorDTO
+        val instructorDTO = InstructorDTO(null, "Anton")
+        every { instructorServiceMock.createInstructor(any()) } returns InstructorDTO(2, "Anton")
 
         val result = webTestClient
             .post()
