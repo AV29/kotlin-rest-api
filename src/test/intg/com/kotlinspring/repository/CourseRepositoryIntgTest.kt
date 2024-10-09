@@ -2,7 +2,10 @@ package com.kotlinspring.repository
 
 import com.kotlinspring.restfulapi.RestfulApiApplication
 import com.kotlinspring.restfulapi.repository.CourseRepository
+import com.kotlinspring.restfulapi.repository.InstructorRepository
+import com.kotlinspring.util.PostgresSQLContainerInitializer
 import com.kotlinspring.util.courseEntityList
+import com.kotlinspring.util.instructorEntity
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -10,6 +13,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
@@ -18,7 +22,11 @@ import java.util.stream.Stream
 @DataJpaTest
 @ContextConfiguration(classes = [RestfulApiApplication::class])
 @ActiveProfiles("test")
-class CourseRepositoryIntgTest {
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+class CourseRepositoryIntgTest: PostgresSQLContainerInitializer() {
+
+    @Autowired
+    lateinit var instructorRepository: InstructorRepository
 
     @Autowired
     lateinit var courseRepository: CourseRepository
@@ -26,7 +34,9 @@ class CourseRepositoryIntgTest {
     @BeforeEach
     fun setup() {
         courseRepository.deleteAll()
-        val courses = courseEntityList()
+        instructorRepository.deleteAll()
+        val instructor = instructorRepository.save(instructorEntity());
+        val courses = courseEntityList(instructor)
         courseRepository.saveAll(courses)
     }
 
